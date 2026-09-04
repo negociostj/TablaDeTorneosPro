@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tablas Pro - Híbrida</title>
+<title>Tablas Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Space Grotesk',sans-serif}
@@ -33,8 +33,7 @@ input,select{width:100%;background:#0f0f0f;border:1px solid #2a2a2a;border-radiu
 .admin-only{display:none}
 body.is-admin .admin-only{display:block}
 body.is-admin .ad-box{display:none !important}
-body.is-admin .ad-label{display:none !important}
-.ad-box{background:#111;border:1px dashed #222;border-radius:12px;padding:8px;margin-top:12px;min-height:50px;display:flex;align-items:center;justify-content:center}
+.ad-box{background:#111;border-radius:12px;padding:8px;margin-top:12px;min-height:20px;display:flex;align-items:center;justify-content:center}
 .torneo-card{background:#161616;border:1px solid #232323;border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer}
 .torneo-card:hover{border-color:#c8ff00}
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000e;display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
@@ -45,35 +44,30 @@ body.is-admin .ad-label{display:none !important}
 .asist-check input:checked + span{background:#c8ff00;color:#000;border-radius:20px;padding:2px 6px}
 .badge-pro{background:#c8ff00;color:#000;font-size:9px;padding:3px 8px;border-radius:20px;font-weight:800;margin-left:8px}
 .suspendido{background:#ff555522;border:1px solid #ff5555;color:#ff5555;font-size:9px;padding:2px 6px;border-radius:10px}
-.ad-label{font-size:9px;color:#444;text-align:center;margin-top:4px;letter-spacing:1px}
 </style>
 </head>
 <body>
-<div class="header"><div class="logo">TABLAS <span>PRO</span> <span class="badge-pro">CLIENTE</span></div><div id="userBadge" style="font-size:11px;padding:6px 12px;border-radius:20px;background:#1a1a1a;color:#666">No logueado</div></div>
+<div class="header"><div class="logo">TABLAS <span>PRO</span></div><div id="userBadge" style="font-size:11px;padding:6px 12px;border-radius:20px;background:#1a1a1a;color:#666">No logueado</div></div>
 
 <div id="authSection" class="auth-card">
-<h2>Entrar a Tablas Pro</h2>
-<p style="color:#666;font-size:12px;margin-bottom:12px">Admin sin anuncios • Invitados con anuncios</p>
+<h2>Entrar</h2>
 <input id="emailInput" type="email" placeholder="Correo">
 <input id="passInput" type="password" placeholder="Contraseña">
 <button class="btn" onclick="login()">Entrar</button>
-<button class="btn btn-dark" onclick="register()">Crear cuenta invitado</button>
-<button class="btn btn-dark" onclick="resetPass()" style="background:transparent;color:#555;border:none;font-size:12px;margin-top:8px">¿Olvidaste tu contraseña?</button>
+<button class="btn btn-dark" onclick="register()">Crear cuenta</button>
 <div id="authError" style="font-size:12px;margin-top:10px;color:#ff5555"></div>
 </div>
 
 <div id="mainApp" style="display:none">
 <div id="view-lista">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="font-size:20px">Tablas Pro</h2><div style="display:flex;gap:6px"><button class="btn btn-small btn-dark" onclick="openPerfilLista()" style="width:auto;margin:0">Perfil</button><button class="btn btn-small btn-dark" onclick="logout()" style="width:auto;margin:0">Salir</button></div></div>
-<div class="card admin-only"><h3>Agregar Nuevo Torneo Pro</h3><input id="newTorneoNombre" placeholder="Ej: Liga Pro 2025"><button class="btn" onclick="crearTorneo()">Agregar Torneo</button></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="font-size:20px">Torneos</h2><div style="display:flex;gap:6px"><button class="btn btn-small btn-dark" onclick="openPerfilLista()" style="width:auto;margin:0">Perfil</button><button class="btn btn-small btn-dark" onclick="logout()" style="width:auto;margin:0">Salir</button></div></div>
+<div class="card admin-only"><h3>Agregar Nuevo Torneo</h3><input id="newTorneoNombre" placeholder="Ej: Liga 2025"><button class="btn" onclick="crearTorneo()">Agregar Torneo</button></div>
 <div id="listaTorneos"></div>
-<div class="ad-box" id="ad-lista"><span style="color:#333;font-size:11px">Anuncio - Solo invitados</span></div><div class="ad-label" id="ad-label-lista" style="display:none">Publicidad - Solo invitados ven anuncios</div>
+<div class="ad-box" id="ad-lista"></div>
 </div>
 
 <div id="view-torneo" style="display:none">
 <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin:0">← Volver</button><h2 id="torneoNombreTitle" style="font-size:18px"></h2></div>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span id="welcomeMsg" style="font-size:11px;color:#666"></span><button class="btn btn-small btn-dark admin-only" onclick="borrarTorneoActual()" style="width:auto;margin:0;background:#2a1515;border-color:#442222;color:#ff5555">Borrar Torneo</button></div>
-
 <div class="tabs">
 <button class="tab active" onclick="switchTab('tabla',this)">Tabla</button>
 <button class="tab" onclick="switchTab('plantilla',this)">Plantilla</button>
@@ -85,27 +79,27 @@ body.is-admin .ad-label{display:none !important}
 <button class="tab" onclick="switchTab('perfil',this)">Perfil</button>
 </div>
 
-<div id="v-tabla"><div id="tablaCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-tabla"></div><div class="ad-label" id="ad-label-tabla" style="display:none">Publicidad - Solo invitados</div></div>
+<div id="v-tabla"><div id="tablaCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-tabla"></div></div>
 <div id="v-plantilla" style="display:none">
-<div class="card admin-only"><h3>Nuevo Jugador Pro</h3><div class="photo-upload" onclick="document.getElementById('fotoInput').click()" id="photoPreview"><span style="font-size:24px;color:#444">+</span></div><input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(this)"><input id="jugNombre" placeholder="Nombre"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="jugEquipo"></select><select id="jugPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select></div><input id="jugNumero" type="number" placeholder="Número"><button class="btn" onclick="addJugador()">Agregar</button></div>
+<div class="card admin-only"><h3>Nuevo Jugador</h3><div class="photo-upload" onclick="document.getElementById('fotoInput').click()" id="photoPreview"><span style="font-size:24px;color:#444">+</span></div><input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(this)"><input id="jugNombre" placeholder="Nombre"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="jugEquipo"></select><select id="jugPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select></div><input id="jugNumero" type="number" placeholder="Número"><button class="btn" onclick="addJugador()">Agregar</button></div>
 <div style="margin-bottom:10px"><input id="searchJug" placeholder="Buscar jugador..." oninput="render()"></div>
-<div id="plantillaGrid" class="plantilla-grid"></div><div class="ad-box" id="ad-plantilla"></div><div class="ad-label" id="ad-label-plantilla" style="display:none">Publicidad</div></div>
+<div id="plantillaGrid" class="plantilla-grid"></div><div class="ad-box" id="ad-plantilla"></div></div>
 <div id="v-partidos" style="display:none">
-<div class="card admin-only"><h3>Nuevo Partido Pro</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="localSel"></select><select id="visitSel"></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input id="gLocal" type="number" placeholder="Goles Local"><input id="gVisit" type="number" placeholder="Goles Visita"></div>
+<div class="card admin-only"><h3>Nuevo Partido</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="localSel"></select><select id="visitSel"></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input id="gLocal" type="number" placeholder="Goles Local"><input id="gVisit" type="number" placeholder="Goles Visita"></div>
 <div style="margin-top:14px;border-top:1px solid #222;padding-top:14px">
 <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Goles / Asist / Tarjetas</span><button class="btn btn-small" onclick="addStatRow()" style="background:transparent;color:#c8ff00;border:1px solid #c8ff00;width:auto">+ Jugador</button></div><div id="statsInputs"></div>
-<div style="margin-top:14px;border-top:1px solid #222;padding-top:14px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Asistencia (quién vino)</span><div id="asistInputs" class="asist-check"></div></div>
+<div style="margin-top:14px;border-top:1px solid #222;padding-top:14px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Asistencia</span><div id="asistInputs" class="asist-check"></div></div>
 </div>
 <button class="btn" onclick="addPartido()" style="margin-top:16px">Guardar Partido</button></div>
-<div class="card"><h3>Historial - Editar goles</h3><div id="listaPartidos"></div></div><div class="ad-box" id="ad-partidos"></div><div class="ad-label" id="ad-label-partidos" style="display:none">Publicidad</div></div>
-<div id="v-goleadores" style="display:none"><div id="goleadoresCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-goleadores"></div><div class="ad-label" id="ad-label-goleadores" style="display:none">Publicidad</div></div>
-<div id="v-asistencias" style="display:none"><div id="asistenciasCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="card" style="margin-top:12px"><h3>Resumen</h3><div id="asistResumen" style="font-size:12px;color:#888"></div></div><div class="ad-box" id="ad-asistencias"></div><div class="ad-label" id="ad-label-asistencias" style="display:none">Publicidad</div></div>
-<div id="v-tarjetas" style="display:none"><div id="tarjetasCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-tarjetas"></div><div class="ad-label" id="ad-label-tarjetas" style="display:none">Publicidad</div></div>
-<div id="v-equipos" style="display:none"><div class="card admin-only"><h3>Nuevo Equipo</h3><input id="newTeam" placeholder="Nombre"><button class="btn" onclick="addEquipo()">Agregar Equipo</button></div><div class="card"><h3>Equipos</h3><div id="listaEquipos"></div></div><div class="ad-box" id="ad-equipos"></div><div class="ad-label" id="ad-label-equipos" style="display:none">Publicidad</div></div>
-<div id="v-perfil" style="display:none"><div class="card"><h3>Perfil Pro</h3><div style="font-size:13px;margin-bottom:14px">Correo: <b id="perfilCorreo"></b><br>Rol: <b id="perfilRol" style="color:#c8ff00"></b><br><small style="color:#666" id="adInfo"></small></div><h3>Cambiar correo admin</h3><input id="newEmail" type="email" placeholder="Nuevo correo"><input id="currentPassForEmail" type="password" placeholder="Contraseña actual"><button class="btn btn-dark" onclick="cambiarMiCorreo()">Actualizar</button><div style="height:1px;background:#222;margin:18px 0"></div><h3>Cambiar contraseña</h3><input id="newPass" type="password" placeholder="Nueva"><input id="newPass2" type="password" placeholder="Repetir"><button class="btn" onclick="cambiarMiPass()">Actualizar</button><div id="perfilMsg" style="font-size:12px;margin-top:12px"></div></div></div>
+<div class="card"><h3>Historial</h3><div id="listaPartidos"></div></div><div class="ad-box" id="ad-partidos"></div></div>
+<div id="v-goleadores" style="display:none"><div id="goleadoresCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-goleadores"></div></div>
+<div id="v-asistencias" style="display:none"><div id="asistenciasCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="card" style="margin-top:12px"><h3>Resumen</h3><div id="asistResumen" style="font-size:12px;color:#888"></div></div><div class="ad-box" id="ad-asistencias"></div></div>
+<div id="v-tarjetas" style="display:none"><div id="tarjetasCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-tarjetas"></div></div>
+<div id="v-equipos" style="display:none"><div class="card admin-only"><h3>Nuevo Equipo</h3><input id="newTeam" placeholder="Nombre"><button class="btn" onclick="addEquipo()">Agregar Equipo</button></div><div class="card"><h3>Equipos</h3><div id="listaEquipos"></div></div><div class="ad-box" id="ad-equipos"></div></div>
+<div id="v-perfil" style="display:none"><div class="card"><h3>Perfil</h3><div style="font-size:13px;margin-bottom:14px">Correo: <b id="perfilCorreo"></b></div><h3>Cambiar correo</h3><input id="newEmail" type="email" placeholder="Nuevo correo"><input id="currentPassForEmail" type="password" placeholder="Contraseña actual"><button class="btn btn-dark" onclick="cambiarMiCorreo()">Actualizar</button><div style="height:1px;background:#222;margin:18px 0"></div><h3>Cambiar contraseña</h3><input id="newPass" type="password" placeholder="Nueva"><input id="newPass2" type="password" placeholder="Repetir"><button class="btn" onclick="cambiarMiPass()">Actualizar</button><div id="perfilMsg" style="font-size:12px;margin-top:12px"></div></div></div>
 </div>
 
-<div id="view-perfil-lista" style="display:none"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin-bottom:12px">← Volver</button><div class="card"><h3>Perfil Pro</h3><div style="font-size:13px;margin-bottom:14px">Correo: <b id="perfilCorreoLista"></b><br>Rol: <b id="perfilRolLista" style="color:#c8ff00"></b></div><h3>Cambiar correo</h3><input id="newEmailLista" type="email" placeholder="Nuevo correo"><input id="currentPassForEmailLista" type="password" placeholder="Contraseña actual"><button class="btn btn-dark" onclick="cambiarMiCorreoLista()">Actualizar</button><div style="height:1px;background:#222;margin:18px 0"></div><h3>Cambiar contraseña</h3><input id="newPassLista" type="password" placeholder="Nueva"><input id="newPass2Lista" type="password" placeholder="Repetir"><button class="btn" onclick="cambiarMiPassLista()">Actualizar</button><div id="perfilMsgLista" style="font-size:12px;margin-top:12px"></div></div></div>
+<div id="view-perfil-lista" style="display:none"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin-bottom:12px">← Volver</button><div class="card"><h3>Perfil</h3><div style="font-size:13px;margin-bottom:14px">Correo: <b id="perfilCorreoLista"></b></div><h3>Cambiar correo</h3><input id="newEmailLista" type="email" placeholder="Nuevo correo"><input id="currentPassForEmailLista" type="password" placeholder="Contraseña actual"><button class="btn btn-dark" onclick="cambiarMiCorreoLista()">Actualizar</button><div style="height:1px;background:#222;margin:18px 0"></div><h3>Cambiar contraseña</h3><input id="newPassLista" type="password" placeholder="Nueva"><input id="newPass2Lista" type="password" placeholder="Repetir"><button class="btn" onclick="cambiarMiPassLista()">Actualizar</button><div id="perfilMsgLista" style="font-size:12px;margin-top:12px"></div></div></div>
 </div>
 
 <div id="modalEditar" class="modal" style="display:none"><div class="modal-box"><h3>Editar Jugador</h3><input id="editNombre"><select id="editEquipo"></select><select id="editPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select><input id="editNumero" type="number"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-dark" onclick="cerrarModal()">Cancelar</button><button class="btn" onclick="guardarEdicion()">Guardar</button></div></div></div>
@@ -114,9 +108,8 @@ body.is-admin .ad-label{display:none !important}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail, updateEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, updateEmail, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
-// Firebase Pro cliente - tablas-pro
 const firebaseConfig = {
   apiKey: "AIzaSyAD0VF8eXJ7tsTZRAlkqpGQYxFpLslZw6g",
   authDomain: "tablas-pro.firebaseapp.com",
@@ -126,35 +119,31 @@ const firebaseConfig = {
   appId: "1:533280737264:web:e3d813e3a207623e0e7f35",
   measurementId: "G-5PZ4JL59B2"
 };
-// ADMIN PRO SIN ANUNCIOS - NUEVO CORREO
 const ADMIN_EMAIL = "luiskah77@gmail.com";
 
-// ZONAS NUEVAS PARA PRO - CREA NUEVAS EN MONETAG
 const AD_ZONES_PRO = {
-  lista: 'PON_AQUI_NUEVA_ZONA_PRO_LISTA',
-  tabla: 'PON_AQUI_NUEVA_ZONA_PRO_TABLA',
-  plantilla: 'PON_AQUI_NUEVA_ZONA_PRO_PLANTILLA',
-  partidos: 'PON_AQUI_NUEVA_ZONA_PRO_PARTIDOS',
-  goleadores: 'PON_AQUI_NUEVA_ZONA_PRO_GOLEADORES',
-  asistencias: 'PON_AQUI_NUEVA_ZONA_PRO_ASISTENCIAS',
-  tarjetas: 'PON_AQUI_NUEVA_ZONA_PRO_TARJETAS',
-  equipos: 'PON_AQUI_NUEVA_ZONA_PRO_EQUIPOS'
+  lista: 'PON_AQUI_NUEVA_ZONA',
+  tabla: 'PON_AQUI_NUEVA_ZONA',
+  plantilla: 'PON_AQUI_NUEVA_ZONA',
+  partidos: 'PON_AQUI_NUEVA_ZONA',
+  goleadores: 'PON_AQUI_NUEVA_ZONA',
+  asistencias: 'PON_AQUI_NUEVA_ZONA',
+  tarjetas: 'PON_AQUI_NUEVA_ZONA',
+  equipos: 'PON_AQUI_NUEVA_ZONA'
 };
 
 let loadedAds={};
 function loadAdForTab(tab, isAdmin){
-  if(isAdmin) return; // Admin no ve anuncios
+  if(isAdmin) return;
   if(!AD_ZONES_PRO[tab] || loadedAds[tab]) return;
-  if(AD_ZONES_PRO[tab].includes('PON_AQUI')) return; // Si no has puesto nuevas zonas aún, no carga
+  if(AD_ZONES_PRO[tab].includes('PON_AQUI')) return;
   let c=document.getElementById('ad-'+tab);
-  let label=document.getElementById('ad-label-'+tab);
   if(!c) return;
   c.innerHTML='';
   let s=document.createElement('script');
   s.dataset.zone=AD_ZONES_PRO[tab];
   s.src='https://nap5k.com/tag.min.js';
   c.appendChild(s);
-  if(label) label.style.display='block';
   loadedAds[tab]=true;
 }
 
@@ -169,12 +158,8 @@ onAuthStateChanged(auth,(user)=>{
     document.getElementById('userBadge').textContent=user.email;
     isAdmin=user.email.toLowerCase().trim()===ADMIN_EMAIL.toLowerCase();
     document.body.classList.toggle('is-admin',isAdmin);
-    document.getElementById('welcomeMsg').textContent=isAdmin?'ADMIN PRO - SIN ANUNCIOS (luiskah77@gmail.com)':'INVITADO - CON ANUNCIOS';
     document.getElementById('perfilCorreo').textContent=user.email;
     document.getElementById('perfilCorreoLista').textContent=user.email;
-    document.getElementById('perfilRol').textContent=isAdmin?'ADMIN PRO SIN ANUNCIOS':'INVITADO CON ANUNCIOS';
-    document.getElementById('perfilRolLista').textContent=isAdmin?'ADMIN PRO':'INVITADO';
-    document.getElementById('adInfo').textContent=isAdmin?'Tú como admin no ves anuncios. Los invitados sí ven anuncios con las nuevas zonas Pro.':'Ves anuncios porque eres invitado. Admin (luiskah77@gmail.com) no ve anuncios.';
     document.getElementById('userBadge').style.background=isAdmin?'#c8ff00':'#1a1a1a';
     document.getElementById('userBadge').style.color=isAdmin?'#000':'#888';
     cargarTorneos();
@@ -197,23 +182,21 @@ async function cargarTorneos(){
 }
 function renderLista(){
   let cont=document.getElementById('listaTorneos');
-  if(torneos.length===0){ cont.innerHTML='<div class="empty">No hay tablas Pro aún. Agrega la primera (solo admin luiskah77@gmail.com)</div>'; return; }
-  cont.innerHTML=torneos.map(t=>`<div class="torneo-card" onclick="abrirTorneo('${t.id}')"><div style="display:flex;justify-content:space-between"><div><h2>${t.nombre} <span class="badge-pro">PRO</span></h2><small>Equipos: ${(t.equipos||[]).length} • Jugadores: ${(t.plantilla||[]).length} • Partidos: ${(t.partidos||[]).length}</small><br><small style="color:#444">${t.creado? new Date(t.creado).toLocaleDateString():''}</small></div><span style="font-size:22px">🏆</span></div></div>`).join('');
+  if(torneos.length===0){ cont.innerHTML='<div class="empty">No hay torneos.</div>'; return; }
+  cont.innerHTML=torneos.map(t=>`<div class="torneo-card" onclick="abrirTorneo('${t.id}')"><div style="display:flex;justify-content:space-between"><div><h2>${t.nombre}</h2><small>Equipos: ${(t.equipos||[]).length} • Jugadores: ${(t.plantilla||[]).length} • Partidos: ${(t.partidos||[]).length}</small><br><small style="color:#444">${t.creado? new Date(t.creado).toLocaleDateString():''}</small></div><span style="font-size:22px">🏆</span></div></div>`).join('');
 }
-window.crearTorneo=async function(){ if(!isAdmin)return alert('Solo admin luiskah77@gmail.com puede agregar'); let nombre=document.getElementById('newTorneoNombre').value.trim(); if(!nombre)return alert('Escribe nombre'); await addDoc(torneosCol,{nombre,creado:new Date().toISOString(),equipos:[],plantilla:[],partidos:[]}); document.getElementById('newTorneoNombre').value=''; }
+window.crearTorneo=async function(){ if(!isAdmin)return alert('No tienes permisos'); let nombre=document.getElementById('newTorneoNombre').value.trim(); if(!nombre)return alert('Escribe nombre'); await addDoc(torneosCol,{nombre,creado:new Date().toISOString(),equipos:[],plantilla:[],partidos:[]}); document.getElementById('newTorneoNombre').value=''; }
 window.abrirTorneo=function(id){ torneoActualId=id; let t=torneos.find(x=>x.id===id); if(!t)return; torneoActual=t; equipos=t.equipos||[]; plantilla=t.plantilla||[]; partidos=t.partidos||[]; document.getElementById('view-lista').style.display='none'; document.getElementById('view-perfil-lista').style.display='none'; document.getElementById('view-torneo').style.display='block'; document.getElementById('torneoNombreTitle').textContent=t.nombre; switchTab('tabla',document.querySelector('#view-torneo .tab')); render(); loadedAds={}; loadAdForTab('tabla', isAdmin); }
 window.volverLista=function(){ document.getElementById('view-torneo').style.display='none'; document.getElementById('view-perfil-lista').style.display='none'; document.getElementById('view-lista').style.display='block'; torneoActual=null; torneoActualId=null; loadedAds={}; loadAdForTab('lista', isAdmin); }
-window.borrarTorneoActual=async function(){ if(!isAdmin)return; if(!confirm('¿Borrar tabla Pro "'+torneoActual.nombre+'"?'))return; await deleteDoc(doc(db,"torneos_pro",torneoActualId)); volverLista(); }
-async function saveTorneoActual(){ if(!isAdmin)return alert('Solo admin luiskah77@gmail.com'); if(!torneoActualId)return; await setDoc(doc(db,"torneos_pro",torneoActualId),{nombre:torneoActual.nombre,equipos,plantilla,partidos,creado:torneoActual.creado},{merge:true}); }
-window.login=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } try{ await signInWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent='❌ Correo o contraseña incorrectos. Admin es luiskah77@gmail.com / luiskah77'; } }
-window.register=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } if(pass.length<6){ err.textContent='❌ Mínimo 6'; return; } if(email.toLowerCase()===ADMIN_EMAIL.toLowerCase()){ err.textContent='❌ Ese correo es admin, usa Entrar'; return; } try{ await createUserWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent=e.code==='auth/email-already-in-use'?'❌ Ya existe, usa Entrar':e.message; } }
-window.resetPass=async function(){ let email=document.getElementById('emailInput').value.trim(); let err=document.getElementById('authError'); if(!email){ err.textContent='❌ Escribe tu correo'; return; } try{ await sendPasswordResetEmail(auth,email); err.style.color='#c8ff00'; err.textContent='✅ Correo enviado'; }catch(e){ err.textContent=e.message; } }
+window.borrarTorneoActual=async function(){ if(!isAdmin)return; if(!confirm('¿Borrar torneo "'+torneoActual.nombre+'"?'))return; await deleteDoc(doc(db,"torneos_pro",torneoActualId)); volverLista(); }
+async function saveTorneoActual(){ if(!isAdmin)return; if(!torneoActualId)return; await setDoc(doc(db,"torneos_pro",torneoActualId),{nombre:torneoActual.nombre,equipos,plantilla,partidos,creado:torneoActual.creado},{merge:true}); }
+window.login=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } try{ await signInWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent='❌ Correo o contraseña incorrectos'; } }
+window.register=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } if(pass.length<6){ err.textContent='❌ Mínimo 6'; return; } try{ await createUserWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent=e.code==='auth/email-already-in-use'?'❌ Ya existe, usa Entrar':e.message; } }
 window.logout=function(){ signOut(auth); loadedAds={}; }
 window.openPerfilLista=function(){ document.getElementById('view-lista').style.display='none'; document.getElementById('view-perfil-lista').style.display='block'; }
 window.switchTab=function(v,el){ document.querySelectorAll('#view-torneo .tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); ['tabla','plantilla','partidos','goleadores','asistencias','tarjetas','equipos','perfil'].forEach(id=>{ let e=document.getElementById('v-'+id); if(e) e.style.display=id==v?'block':'none'; }); loadAdForTab(v, isAdmin); }
-window.openPerfil=function(){ switchTab('perfil',null); }
 window.previewFoto=function(input){ if(input.files&&input.files[0]){ let r=new FileReader(); r.onload=function(e){ tempFoto=e.target.result; document.getElementById('photoPreview').innerHTML=`<img src="${tempFoto}">` }; r.readAsDataURL(input.files[0]) } }
-window.addEquipo=function(){ if(!isAdmin)return alert('Solo admin'); let n=document.getElementById('newTeam').value.trim(); if(!n)return; equipos.push(n); document.getElementById('newTeam').value=''; saveTorneoActual(); }
+window.addEquipo=function(){ if(!isAdmin)return; let n=document.getElementById('newTeam').value.trim(); if(!n)return; equipos.push(n); document.getElementById('newTeam').value=''; saveTorneoActual(); }
 window.addJugador=function(){ if(!isAdmin)return; let nombre=document.getElementById('jugNombre').value.trim(); let equipo=document.getElementById('jugEquipo').value; if(!nombre||!equipo)return; plantilla.push({id:Date.now(),nombre,equipo,pos:document.getElementById('jugPos').value,numero:document.getElementById('jugNumero').value,foto:tempFoto||''}); document.getElementById('jugNombre').value=''; tempFoto=''; document.getElementById('photoPreview').innerHTML='<span style="font-size:24px;color:#444">+</span>'; saveTorneoActual(); }
 window.addStatRow=function(){ if(!isAdmin)return; if(plantilla.length===0){ alert('Agrega jugadores'); return } let div=document.createElement('div'); div.className='jugador-row'; let opts=plantilla.map(j=>`<option value="${j.id}">${j.nombre} (${j.equipo})</option>`).join(''); div.innerHTML=`<select><option value="">Jugador</option>${opts}</select><input type="number" placeholder="G"><input type="number" placeholder="A"><input type="number" placeholder="🟨"><input type="number" placeholder="🟥"><span onclick="this.parentElement.remove()" style="color:#444;cursor:pointer;text-align:center">✕</span>`; document.getElementById('statsInputs').appendChild(div); }
 function renderAsistInputs(){ let cont=document.getElementById('asistInputs'); cont.innerHTML=plantilla.map(j=>`<label><input type="checkbox" value="${j.id}" class="asistChk"><span>${j.nombre}</span></label>`).join('')||'<small style="color:#444">Agrega jugadores</small>'; }
