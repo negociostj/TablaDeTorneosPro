@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tablas Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Space Grotesk',sans-serif}
 body{background:#0a0a0a;color:#fff;padding:14px;padding-bottom:90px}
@@ -17,6 +20,7 @@ body{background:#0a0a0a;color:#fff;padding:14px;padding-bottom:90px}
 .card{background:#161616;border:1px solid #232323;border-radius:18px;padding:14px;margin-bottom:12px}
 .card h3{font-size:11px;color:#666;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
 input,select{width:100%;background:#0f0f0f;border:1px solid #2a2a2a;border-radius:12px;padding:11px;color:#fff;margin-bottom:8px;font-size:14px;outline:none}
+input[type=number]::-webkit-inner-spin-button{opacity:1}
 .btn{width:100%;background:#c8ff00;color:#000;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:14px;margin-bottom:8px;cursor:pointer}
 .btn-dark{background:#1e1e1e;color:#fff;border:1px solid #2a2a2a}
 .btn-small{padding:7px 10px;font-size:11px;width:auto;border-radius:8px}
@@ -37,7 +41,7 @@ body.is-admin .ad-box{display:none !important}
 .torneo-card{background:#161616;border:1px solid #232323;border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer}
 .torneo-card:hover{border-color:#c8ff00}
 .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:#000e;display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
-.modal-box{background:#161616;border:1px solid #232323;border-radius:18px;padding:18px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-box{background:#161616;border:1px solid #232323;border-radius:18px;padding:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
 .asist-check{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .asist-check label{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:20px;padding:6px 10px;font-size:11px;cursor:pointer}
 .asist-check input{display:none}
@@ -67,7 +71,18 @@ body.is-admin .ad-box{display:none !important}
 </div>
 
 <div id="view-torneo" style="display:none">
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin:0">← Volver</button><h2 id="torneoNombreTitle" style="font-size:18px"></h2></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px"><div style="display:flex;align-items:center;gap:10px"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin:0">← Volver</button><h2 id="torneoNombreTitle" style="font-size:18px"></h2></div><button class="btn btn-small admin-only" style="background:#2a1515;color:#ff5555;border:1px solid #442222;width:auto" onclick="borrarTorneoActual()">🗑️ Borrar Torneo</button></div>
+
+<!-- APARTADO EXPORTAR - SOLO ADMIN -->
+<div class="card admin-only" style="border-color:#c8ff00">
+<h3 style="color:#c8ff00">📤 Exportar</h3>
+<p style="font-size:11px;color:#666;margin-bottom:10px">Solo tú como administrador ves esto. Invitados no lo ven.</p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-small" style="background:#21a366;color:#fff;width:auto" onclick="exportarExcel()">📊 Excel</button>
+<button class="btn btn-small" style="background:#e53935;color:#fff;width:auto" onclick="exportarPDF()">📄 PDF</button>
+</div>
+</div>
+
 <div class="tabs">
 <button class="tab active" onclick="switchTab('tabla',this)">Tabla</button>
 <button class="tab" onclick="switchTab('plantilla',this)">Plantilla</button>
@@ -81,11 +96,11 @@ body.is-admin .ad-box{display:none !important}
 
 <div id="v-tabla"><div id="tablaCard" style="background:#111;border-radius:18px;padding:12px;border:1px solid #1e1e1e"></div><div class="ad-box" id="ad-tabla"></div></div>
 <div id="v-plantilla" style="display:none">
-<div class="card admin-only"><h3>Nuevo Jugador</h3><div class="photo-upload" onclick="document.getElementById('fotoInput').click()" id="photoPreview"><span style="font-size:24px;color:#444">+</span></div><input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(this)"><input id="jugNombre" placeholder="Nombre"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="jugEquipo"></select><select id="jugPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select></div><input id="jugNumero" type="number" placeholder="Número"><button class="btn" onclick="addJugador()">Agregar</button></div>
+<div class="card admin-only"><h3>Nuevo Jugador</h3><div class="photo-upload" onclick="document.getElementById('fotoInput').click()" id="photoPreview"><span style="font-size:24px;color:#444">+</span></div><input type="file" id="fotoInput" accept="image/*" style="display:none" onchange="previewFoto(this)"><input id="jugNombre" placeholder="Nombre"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="jugEquipo"></select><select id="jugPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select></div><input id="jugNumero" type="number" min="0" placeholder="Número"><button class="btn" onclick="addJugador()">Agregar</button></div>
 <div style="margin-bottom:10px"><input id="searchJug" placeholder="Buscar jugador..." oninput="render()"></div>
 <div id="plantillaGrid" class="plantilla-grid"></div><div class="ad-box" id="ad-plantilla"></div></div>
 <div id="v-partidos" style="display:none">
-<div class="card admin-only"><h3>Nuevo Partido</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="localSel"></select><select id="visitSel"></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input id="gLocal" type="number" placeholder="Goles Local"><input id="gVisit" type="number" placeholder="Goles Visita"></div>
+<div class="card admin-only"><h3>Nuevo Partido</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><select id="localSel"></select><select id="visitSel"></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><input id="gLocal" type="number" min="0" placeholder="Goles Local"><input id="gVisit" type="number" min="0" placeholder="Goles Visita"></div>
 <div style="margin-top:14px;border-top:1px solid #222;padding-top:14px">
 <div style="display:flex;justify-content:space-between;margin-bottom:10px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Goles / Asist / Tarjetas</span><button class="btn btn-small" onclick="addStatRow()" style="background:transparent;color:#c8ff00;border:1px solid #c8ff00;width:auto">+ Jugador</button></div><div id="statsInputs"></div>
 <div style="margin-top:14px;border-top:1px solid #222;padding-top:14px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Asistencia</span><div id="asistInputs" class="asist-check"></div></div>
@@ -102,8 +117,26 @@ body.is-admin .ad-box{display:none !important}
 <div id="view-perfil-lista" style="display:none"><button class="btn btn-small btn-dark" onclick="volverLista()" style="width:auto;margin-bottom:12px">← Volver</button><div class="card"><h3>Perfil</h3><div style="font-size:13px;margin-bottom:14px">Correo: <b id="perfilCorreoLista"></b></div><h3>Cambiar correo</h3><input id="newEmailLista" type="email" placeholder="Nuevo correo"><input id="currentPassForEmailLista" type="password" placeholder="Contraseña actual"><button class="btn btn-dark" onclick="cambiarMiCorreoLista()">Actualizar</button><div style="height:1px;background:#222;margin:18px 0"></div><h3>Cambiar contraseña</h3><input id="newPassLista" type="password" placeholder="Nueva"><input id="newPass2Lista" type="password" placeholder="Repetir"><button class="btn" onclick="cambiarMiPassLista()">Actualizar</button><div id="perfilMsgLista" style="font-size:12px;margin-top:12px"></div></div></div>
 </div>
 
-<div id="modalEditar" class="modal" style="display:none"><div class="modal-box"><h3>Editar Jugador</h3><input id="editNombre"><select id="editEquipo"></select><select id="editPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select><input id="editNumero" type="number"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-dark" onclick="cerrarModal()">Cancelar</button><button class="btn" onclick="guardarEdicion()">Guardar</button></div></div></div>
-<div id="modalEditarPartido" class="modal" style="display:none"><div class="modal-box"><h3>Editar Partido</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="editLocalSel"></select><select id="editVisitSel"></select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="editGLocal" type="number"><input id="editGVisit" type="number"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-dark" onclick="cerrarModalPartido()">Cancelar</button><button class="btn" onclick="guardarEdicionPartido()">Guardar</button></div></div></div>
+<div id="modalEditar" class="modal" style="display:none"><div class="modal-box"><h3>Editar Jugador</h3><input id="editNombre"><select id="editEquipo"></select><select id="editPos"><option>Delantero</option><option>Mediocampista</option><option>Defensa</option><option>Portero</option></select><input id="editNumero" type="number" min="0"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px"><button class="btn btn-dark" onclick="cerrarModal()">Cancelar</button><button class="btn" onclick="guardarEdicion()">Guardar</button></div></div></div>
+
+<div id="modalEditarPartido" class="modal" style="display:none">
+<div class="modal-box" style="max-width:560px">
+<h3>Editar Partido Completo</h3>
+<p style="font-size:11px;color:#666;margin-bottom:12px">Cambia marcador, goleadores y asistencia sin borrar</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><select id="editLocalSel"></select><select id="editVisitSel"></select></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px"><input id="editGLocal" type="number" min="0" placeholder="Goles Local"><input id="editGVisit" type="number" min="0" placeholder="Goles Visita"></div>
+<div style="border-top:1px solid #222;padding-top:12px;margin-bottom:12px">
+<div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;color:#c8ff00;font-weight:700">Goleadores / Tarjetas de este partido</span><button class="btn btn-small" onclick="addEditStatRow()" style="background:transparent;color:#c8ff00;border:1px solid #c8ff00;width:auto">+ Jugador</button></div>
+<div id="editStatsInputs"></div>
+<small style="color:#666;font-size:10px">Aquí cambias quién metió gol, asistencias, amarillas y rojas de este partido</small>
+</div>
+<div style="border-top:1px solid #222;padding-top:12px;margin-bottom:12px">
+<span style="font-size:12px;color:#c8ff00;font-weight:700">Asistencia (quién vino)</span>
+<div id="editAsistInputs" class="asist-check"></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px"><button class="btn btn-dark" onclick="cerrarModalPartido()">Cancelar</button><button class="btn" onclick="guardarEdicionPartido()">Guardar Cambios</button></div>
+</div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -120,36 +153,18 @@ const firebaseConfig = {
   measurementId: "G-5PZ4JL59B2"
 };
 const ADMIN_EMAIL = "luiskah77@gmail.com";
-
-const AD_ZONES_PRO = {
-  lista: 'PON_AQUI_NUEVA_ZONA',
-  tabla: 'PON_AQUI_NUEVA_ZONA',
-  plantilla: 'PON_AQUI_NUEVA_ZONA',
-  partidos: 'PON_AQUI_NUEVA_ZONA',
-  goleadores: 'PON_AQUI_NUEVA_ZONA',
-  asistencias: 'PON_AQUI_NUEVA_ZONA',
-  tarjetas: 'PON_AQUI_NUEVA_ZONA',
-  equipos: 'PON_AQUI_NUEVA_ZONA'
-};
-
+const AD_ZONES_PRO = { lista: 'PON_AQUI', tabla: 'PON_AQUI', plantilla: 'PON_AQUI', partidos: 'PON_AQUI', goleadores: 'PON_AQUI', asistencias: 'PON_AQUI', tarjetas: 'PON_AQUI', equipos: 'PON_AQUI' };
 let loadedAds={};
-function loadAdForTab(tab, isAdmin){
-  if(isAdmin) return;
-  if(!AD_ZONES_PRO[tab] || loadedAds[tab]) return;
-  if(AD_ZONES_PRO[tab].includes('PON_AQUI')) return;
-  let c=document.getElementById('ad-'+tab);
-  if(!c) return;
-  c.innerHTML='';
-  let s=document.createElement('script');
-  s.dataset.zone=AD_ZONES_PRO[tab];
-  s.src='https://nap5k.com/tag.min.js';
-  c.appendChild(s);
-  loadedAds[tab]=true;
+function loadAdForTab(tab, isAdmin){ if(isAdmin) return; if(!AD_ZONES_PRO[tab] || loadedAds[tab]) return; if(AD_ZONES_PRO[tab].includes('PON_AQUI')) return; let c=document.getElementById('ad-'+tab); if(!c) return; c.innerHTML=''; let s=document.createElement('script'); s.dataset.zone=AD_ZONES_PRO[tab]; s.src='https://nap5k.com/tag.min.js'; c.appendChild(s); loadedAds[tab]=true; }
+function enforceNoNegatives(){
+  document.querySelectorAll('input[type=number]').forEach(inp=>{
+    inp.addEventListener('input',()=>{ if(inp.value!=='' && parseInt(inp.value) < 0){ inp.value = 0; } });
+    inp.addEventListener('change',()=>{ if(inp.value!=='' && parseInt(inp.value) < 0){ inp.value = 0; } });
+  });
 }
-
+function sanitizeNum(v){ let n=parseInt(v); if(isNaN(n) || n<0) return 0; return n; }
 const app=initializeApp(firebaseConfig); const db=getFirestore(app); const auth=getAuth(app); const torneosCol=collection(db,"torneos_pro");
 let torneos=[], torneoActual=null, torneoActualId=null, equipos=[], partidos=[], plantilla=[], tempFoto='', isAdmin=false, currentUser=null, editJugId=null, editPartidoIdx=null;
-
 onAuthStateChanged(auth,(user)=>{
   currentUser=user;
   if(user && user.email){
@@ -163,15 +178,13 @@ onAuthStateChanged(auth,(user)=>{
     document.getElementById('userBadge').style.background=isAdmin?'#c8ff00':'#1a1a1a';
     document.getElementById('userBadge').style.color=isAdmin?'#000':'#888';
     cargarTorneos();
-    loadedAds={};
-    loadAdForTab('lista', isAdmin);
+    loadedAds={}; loadAdForTab('lista', isAdmin);
   }else{
     document.getElementById('authSection').style.display='block';
     document.getElementById('mainApp').style.display='none';
     document.getElementById('userBadge').textContent='No logueado';
   }
 });
-
 async function cargarTorneos(){
   onSnapshot(torneosCol,(snap)=>{
     torneos=[]; snap.forEach(d=>torneos.push({id:d.id,...d.data()}));
@@ -182,13 +195,23 @@ async function cargarTorneos(){
 }
 function renderLista(){
   let cont=document.getElementById('listaTorneos');
-  if(torneos.length===0){ cont.innerHTML='<div class="empty">No hay torneos.</div>'; return; }
-  cont.innerHTML=torneos.map(t=>`<div class="torneo-card" onclick="abrirTorneo('${t.id}')"><div style="display:flex;justify-content:space-between"><div><h2>${t.nombre}</h2><small>Equipos: ${(t.equipos||[]).length} • Jugadores: ${(t.plantilla||[]).length} • Partidos: ${(t.partidos||[]).length}</small><br><small style="color:#444">${t.creado? new Date(t.creado).toLocaleDateString():''}</small></div><span style="font-size:22px">🏆</span></div></div>`).join('');
+  if(torneos.length===0){ cont.innerHTML='<div class="empty">No hay torneos. Crea uno.</div>'; return; }
+  cont.innerHTML=torneos.map(t=>`
+    <div class="torneo-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div onclick="abrirTorneo('${t.id}')" style="flex:1;cursor:pointer"><h2>${t.nombre}</h2><small>Equipos: ${(t.equipos||[]).length} • Jugadores: ${(t.plantilla||[]).length} • Partidos: ${(t.partidos||[]).length}</small><br><small style="color:#444">${t.creado? new Date(t.creado).toLocaleDateString():''}</small></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:center">
+          <span style="font-size:22px;cursor:pointer" onclick="abrirTorneo('${t.id}')">🏆</span>
+          ${isAdmin?`<button class="btn-small" style="background:#2a1515;color:#ff5555;border:1px solid #442222;font-size:10px" onclick="borrarTorneo('${t.id}','${t.nombre.replace(/'/g,"\\'")}')">🗑️ Borrar</button>`:''}
+        </div>
+      </div>
+    </div>`).join('');
 }
 window.crearTorneo=async function(){ if(!isAdmin)return alert('No tienes permisos'); let nombre=document.getElementById('newTorneoNombre').value.trim(); if(!nombre)return alert('Escribe nombre'); await addDoc(torneosCol,{nombre,creado:new Date().toISOString(),equipos:[],plantilla:[],partidos:[]}); document.getElementById('newTorneoNombre').value=''; }
 window.abrirTorneo=function(id){ torneoActualId=id; let t=torneos.find(x=>x.id===id); if(!t)return; torneoActual=t; equipos=t.equipos||[]; plantilla=t.plantilla||[]; partidos=t.partidos||[]; document.getElementById('view-lista').style.display='none'; document.getElementById('view-perfil-lista').style.display='none'; document.getElementById('view-torneo').style.display='block'; document.getElementById('torneoNombreTitle').textContent=t.nombre; switchTab('tabla',document.querySelector('#view-torneo .tab')); render(); loadedAds={}; loadAdForTab('tabla', isAdmin); }
 window.volverLista=function(){ document.getElementById('view-torneo').style.display='none'; document.getElementById('view-perfil-lista').style.display='none'; document.getElementById('view-lista').style.display='block'; torneoActual=null; torneoActualId=null; loadedAds={}; loadAdForTab('lista', isAdmin); }
-window.borrarTorneoActual=async function(){ if(!isAdmin)return; if(!confirm('¿Borrar torneo "'+torneoActual.nombre+'"?'))return; await deleteDoc(doc(db,"torneos_pro",torneoActualId)); volverLista(); }
+window.borrarTorneo=async function(id,nombre){ if(!isAdmin)return alert('No tienes permisos'); if(!confirm('¿Borrar torneo completo "'+nombre+'"?\n\nSe borrarán equipos, jugadores y partidos.'))return; await deleteDoc(doc(db,"torneos_pro",id)); if(torneoActualId===id){ volverLista(); } }
+window.borrarTorneoActual=async function(){ if(!isAdmin)return; if(!confirm('¿Borrar torneo completo "'+torneoActual.nombre+'"?\nSe borrarán equipos, jugadores y partidos.'))return; await deleteDoc(doc(db,"torneos_pro",torneoActualId)); volverLista(); }
 async function saveTorneoActual(){ if(!isAdmin)return; if(!torneoActualId)return; await setDoc(doc(db,"torneos_pro",torneoActualId),{nombre:torneoActual.nombre,equipos,plantilla,partidos,creado:torneoActual.creado},{merge:true}); }
 window.login=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } try{ await signInWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent='❌ Correo o contraseña incorrectos'; } }
 window.register=async function(){ let email=document.getElementById('emailInput').value.trim(); let pass=document.getElementById('passInput').value; let err=document.getElementById('authError'); if(!email||!pass){ err.textContent='❌ Escribe correo y contraseña'; return; } if(pass.length<6){ err.textContent='❌ Mínimo 6'; return; } try{ await createUserWithEmailAndPassword(auth,email,pass); err.textContent=''; }catch(e){ err.textContent=e.code==='auth/email-already-in-use'?'❌ Ya existe, usa Entrar':e.message; } }
@@ -197,18 +220,67 @@ window.openPerfilLista=function(){ document.getElementById('view-lista').style.d
 window.switchTab=function(v,el){ document.querySelectorAll('#view-torneo .tab').forEach(t=>t.classList.remove('active')); if(el)el.classList.add('active'); ['tabla','plantilla','partidos','goleadores','asistencias','tarjetas','equipos','perfil'].forEach(id=>{ let e=document.getElementById('v-'+id); if(e) e.style.display=id==v?'block':'none'; }); loadAdForTab(v, isAdmin); }
 window.previewFoto=function(input){ if(input.files&&input.files[0]){ let r=new FileReader(); r.onload=function(e){ tempFoto=e.target.result; document.getElementById('photoPreview').innerHTML=`<img src="${tempFoto}">` }; r.readAsDataURL(input.files[0]) } }
 window.addEquipo=function(){ if(!isAdmin)return; let n=document.getElementById('newTeam').value.trim(); if(!n)return; equipos.push(n); document.getElementById('newTeam').value=''; saveTorneoActual(); }
-window.addJugador=function(){ if(!isAdmin)return; let nombre=document.getElementById('jugNombre').value.trim(); let equipo=document.getElementById('jugEquipo').value; if(!nombre||!equipo)return; plantilla.push({id:Date.now(),nombre,equipo,pos:document.getElementById('jugPos').value,numero:document.getElementById('jugNumero').value,foto:tempFoto||''}); document.getElementById('jugNombre').value=''; tempFoto=''; document.getElementById('photoPreview').innerHTML='<span style="font-size:24px;color:#444">+</span>'; saveTorneoActual(); }
-window.addStatRow=function(){ if(!isAdmin)return; if(plantilla.length===0){ alert('Agrega jugadores'); return } let div=document.createElement('div'); div.className='jugador-row'; let opts=plantilla.map(j=>`<option value="${j.id}">${j.nombre} (${j.equipo})</option>`).join(''); div.innerHTML=`<select><option value="">Jugador</option>${opts}</select><input type="number" placeholder="G"><input type="number" placeholder="A"><input type="number" placeholder="🟨"><input type="number" placeholder="🟥"><span onclick="this.parentElement.remove()" style="color:#444;cursor:pointer;text-align:center">✕</span>`; document.getElementById('statsInputs').appendChild(div); }
+window.addJugador=function(){ if(!isAdmin)return; let nombre=document.getElementById('jugNombre').value.trim(); let equipo=document.getElementById('jugEquipo').value; if(!nombre||!equipo)return; plantilla.push({id:Date.now(),nombre,equipo,pos:document.getElementById('jugPos').value,numero:sanitizeNum(document.getElementById('jugNumero').value),foto:tempFoto||''}); document.getElementById('jugNombre').value=''; tempFoto=''; document.getElementById('photoPreview').innerHTML='<span style="font-size:24px;color:#444">+</span>'; saveTorneoActual(); }
+function createStatRowElement(data){
+  let div=document.createElement('div'); div.className='jugador-row';
+  let opts=plantilla.map(j=>`<option value="${j.id}" ${data && data.id==j.id?'selected':''}>${j.nombre} (${j.equipo})</option>`).join('');
+  let g=data?data.goles:''; let a=data?data.asistencias:''; let am=data?data.amarillas:''; let ro=data?data.rojas:'';
+  div.innerHTML=`<select><option value="">Jugador</option>${opts}</select><input type="number" min="0" placeholder="G" value="${g}"><input type="number" min="0" placeholder="A" value="${a}"><input type="number" min="0" placeholder="🟨" value="${am}"><input type="number" min="0" placeholder="🟥" value="${ro}"><span onclick="this.parentElement.remove()" style="color:#444;cursor:pointer;text-align:center">✕</span>`;
+  div.querySelectorAll('input').forEach(inp=>{ inp.addEventListener('input',()=>{ if(inp.value!=='' && parseInt(inp.value)<0) inp.value=0; }); });
+  return div;
+}
+window.addStatRow=function(){ if(!isAdmin)return; if(plantilla.length===0){ alert('Agrega jugadores'); return } document.getElementById('statsInputs').appendChild(createStatRowElement(null)); }
+window.addEditStatRow=function(){ if(plantilla.length===0){ alert('Agrega jugadores'); return } document.getElementById('editStatsInputs').appendChild(createStatRowElement(null)); }
 function renderAsistInputs(){ let cont=document.getElementById('asistInputs'); cont.innerHTML=plantilla.map(j=>`<label><input type="checkbox" value="${j.id}" class="asistChk"><span>${j.nombre}</span></label>`).join('')||'<small style="color:#444">Agrega jugadores</small>'; }
-window.addPartido=function(){ if(!isAdmin)return; let l=document.getElementById('localSel').value,v=document.getElementById('visitSel').value,gl=parseInt(document.getElementById('gLocal').value),gv=parseInt(document.getElementById('gVisit').value); if(!l||!v||isNaN(gl)||isNaN(gv))return alert('Completa'); let stats=[]; document.querySelectorAll('#statsInputs .jugador-row').forEach(r=>{ let id=r.children[0].value; let gol=parseInt(r.children[1].value)||0; let asi=parseInt(r.children[2].value)||0; let ama=parseInt(r.children[3].value)||0; let roja=parseInt(r.children[4].value)||0; if(id&&(gol||asi||ama||roja)){ let jug=plantilla.find(j=>j.id==id); stats.push({id:parseInt(id),nombre:jug.nombre,equipo:jug.equipo,goles:gol,asistencias:asi,amarillas:ama,rojas:roja}) } }); let asistentes=[]; document.querySelectorAll('.asistChk:checked').forEach(c=>asistentes.push(parseInt(c.value))); partidos.push({local:l,visit:v,gL:gl,gV:gv,stats,asistentes,fecha:new Date().toLocaleDateString()}); document.getElementById('statsInputs').innerHTML=''; document.getElementById('gLocal').value=''; document.getElementById('gVisit').value=''; saveTorneoActual(); }
+function renderEditAsistInputs(selected){ let cont=document.getElementById('editAsistInputs'); cont.innerHTML=plantilla.map(j=>{ let checked=selected && selected.includes(j.id)?'checked':''; return `<label><input type="checkbox" value="${j.id}" class="editAsistChk" ${checked}><span>${j.nombre}</span></label>` }).join('')||'<small style="color:#444">Agrega jugadores</small>'; }
+window.addPartido=function(){
+  if(!isAdmin)return;
+  let l=document.getElementById('localSel').value,v=document.getElementById('visitSel').value;
+  let gl=sanitizeNum(document.getElementById('gLocal').value), gv=sanitizeNum(document.getElementById('gVisit').value);
+  if(!l||!v){ alert('Selecciona equipos'); return; }
+  let stats=[]; document.querySelectorAll('#statsInputs .jugador-row').forEach(r=>{
+    let id=r.children[0].value;
+    let gol=sanitizeNum(r.children[1].value), asi=sanitizeNum(r.children[2].value), ama=sanitizeNum(r.children[3].value), roja=sanitizeNum(r.children[4].value);
+    if(id&&(gol||asi||ama||roja)){ let jug=plantilla.find(j=>j.id==id); if(jug) stats.push({id:parseInt(id),nombre:jug.nombre,equipo:jug.equipo,goles:gol,asistencias:asi,amarillas:ama,rojas:roja}) }
+  });
+  let asistentes=[]; document.querySelectorAll('.asistChk:checked').forEach(c=>asistentes.push(parseInt(c.value)));
+  partidos.push({local:l,visit:v,gL:gl,gV:gv,stats,asistentes,fecha:new Date().toLocaleDateString()});
+  document.getElementById('statsInputs').innerHTML=''; document.getElementById('gLocal').value=''; document.getElementById('gVisit').value=''; saveTorneoActual();
+}
 window.editarJugador=function(id){ let j=plantilla.find(x=>x.id===id); if(!j)return; editJugId=id; document.getElementById('editNombre').value=j.nombre; document.getElementById('editEquipo').innerHTML=equipos.map(e=>`<option ${e===j.equipo?'selected':''}>${e}</option>`).join(''); document.getElementById('editPos').value=j.pos; document.getElementById('editNumero').value=j.numero; document.getElementById('modalEditar').style.display='flex'; }
 window.cerrarModal=function(){ document.getElementById('modalEditar').style.display='none'; editJugId=null; }
-window.guardarEdicion=function(){ if(!editJugId)return; let j=plantilla.find(x=>x.id===editJugId); j.nombre=document.getElementById('editNombre').value.trim(); j.equipo=document.getElementById('editEquipo').value; j.pos=document.getElementById('editPos').value; j.numero=document.getElementById('editNumero').value; cerrarModal(); saveTorneoActual(); }
+window.guardarEdicion=function(){ if(!editJugId)return; let j=plantilla.find(x=>x.id===editJugId); j.nombre=document.getElementById('editNombre').value.trim(); j.equipo=document.getElementById('editEquipo').value; j.pos=document.getElementById('editPos').value; j.numero=sanitizeNum(document.getElementById('editNumero').value); cerrarModal(); saveTorneoActual(); }
 window.borrarJugador=function(id){ if(!confirm('¿Borrar jugador?'))return; plantilla=plantilla.filter(x=>x.id!==id); saveTorneoActual(); }
 window.borrarEquipo=function(idx){ let nombre=equipos[idx]; if(!confirm(`¿Borrar equipo ${nombre}?`))return; if(confirm(`¿Borrar también ${plantilla.filter(j=>j.equipo===nombre).length} jugadores?`)){ plantilla=plantilla.filter(j=>j.equipo!==nombre); } equipos.splice(idx,1); saveTorneoActual(); }
-window.editarPartido=function(idx){ let p=partidos[idx]; if(!p)return; editPartidoIdx=idx; document.getElementById('editLocalSel').innerHTML=equipos.map(e=>`<option ${e===p.local?'selected':''}>${e}</option>`).join(''); document.getElementById('editVisitSel').innerHTML=equipos.map(e=>`<option ${e===p.visit?'selected':''}>${e}</option>`).join(''); document.getElementById('editGLocal').value=p.gL; document.getElementById('editGVisit').value=p.gV; document.getElementById('modalEditarPartido').style.display='flex'; }
+window.editarPartido=function(idx){
+  let p=partidos[idx]; if(!p)return; editPartidoIdx=idx;
+  document.getElementById('editLocalSel').innerHTML=equipos.map(e=>`<option ${e===p.local?'selected':''}>${e}</option>`).join('');
+  document.getElementById('editVisitSel').innerHTML=equipos.map(e=>`<option ${e===p.visit?'selected':''}>${e}</option>`).join('');
+  document.getElementById('editGLocal').value=p.gL; document.getElementById('editGVisit').value=p.gV;
+  let cont=document.getElementById('editStatsInputs'); cont.innerHTML='';
+  (p.stats||[]).forEach(s=>{ cont.appendChild(createStatRowElement(s)); });
+  renderEditAsistInputs(p.asistentes||[]);
+  document.getElementById('modalEditarPartido').style.display='flex';
+}
 window.cerrarModalPartido=function(){ document.getElementById('modalEditarPartido').style.display='none'; editPartidoIdx=null; }
-window.guardarEdicionPartido=function(){ if(editPartidoIdx===null)return; let p=partidos[editPartidoIdx]; p.local=document.getElementById('editLocalSel').value; p.visit=document.getElementById('editVisitSel').value; p.gL=parseInt(document.getElementById('editGLocal').value)||0; p.gV=parseInt(document.getElementById('editGVisit').value)||0; cerrarModalPartido(); saveTorneoActual(); }
+window.guardarEdicionPartido=function(){
+  if(editPartidoIdx===null)return;
+  let p=partidos[editPartidoIdx];
+  p.local=document.getElementById('editLocalSel').value;
+  p.visit=document.getElementById('editVisitSel').value;
+  p.gL=sanitizeNum(document.getElementById('editGLocal').value);
+  p.gV=sanitizeNum(document.getElementById('editGVisit').value);
+  let newStats=[];
+  document.querySelectorAll('#editStatsInputs .jugador-row').forEach(r=>{
+    let id=r.children[0].value;
+    let gol=sanitizeNum(r.children[1].value), asi=sanitizeNum(r.children[2].value), ama=sanitizeNum(r.children[3].value), roja=sanitizeNum(r.children[4].value);
+    if(id){ let jug=plantilla.find(j=>j.id==id); if(jug) newStats.push({id:parseInt(id),nombre:jug.nombre,equipo:jug.equipo,goles:gol,asistencias:asi,amarillas:ama,rojas:roja}) }
+  });
+  p.stats=newStats;
+  let newAsist=[]; document.querySelectorAll('.editAsistChk:checked').forEach(c=>newAsist.push(parseInt(c.value)));
+  p.asistentes=newAsist;
+  cerrarModalPartido(); saveTorneoActual();
+}
 window.borrarPartido=function(idx){ if(!confirm('¿Borrar partido?'))return; partidos.splice(idx,1); saveTorneoActual(); }
 window.cambiarMiCorreo=async function(){ let newEmail=document.getElementById('newEmail').value.trim(); let currPass=document.getElementById('currentPassForEmail').value; let msg=document.getElementById('perfilMsg'); if(!newEmail||!currPass){ msg.textContent='Completa'; return; } try{ let cred=EmailAuthProvider.credential(currentUser.email,currPass); await reauthenticateWithCredential(currentUser,cred); await updateEmail(currentUser,newEmail); msg.style.color='#c8ff00'; msg.textContent='✅ Correo cambiado'; }catch(e){ msg.style.color='#ff5555'; msg.textContent=e.message; } }
 window.cambiarMiCorreoLista=async function(){ let newEmail=document.getElementById('newEmailLista').value.trim(); let currPass=document.getElementById('currentPassForEmailLista').value; let msg=document.getElementById('perfilMsgLista'); if(!newEmail||!currPass){ msg.textContent='Completa'; return; } try{ let cred=EmailAuthProvider.credential(currentUser.email,currPass); await reauthenticateWithCredential(currentUser,cred); await updateEmail(currentUser,newEmail); msg.style.color='#c8ff00'; msg.textContent='✅ Cambiado'; }catch(e){ msg.style.color='#ff5555'; msg.textContent=e.message; } }
@@ -233,7 +305,67 @@ window.render=function(){
   document.getElementById('asistenciasCard').innerHTML= `<div class="table-header" style="grid-template-columns:32px 1fr 44px 44px"><div>#</div><div>JUGADOR</div><div style="text-align:center">ASIST</div><div style="text-align:center">%</div></div>` + allStats.sort((a,b)=>b.asistenciasPartidos-a.asistenciasPartidos).map((s,i)=>{ let pct=partidos.length? Math.round((s.asistenciasPartidos/partidos.length)*100):0; return `<div class="table-row" style="grid-template-columns:32px 1fr 44px 44px"><div>${i+1}</div><div>${s.nombre} <small style="color:#666">(${s.equipo})</small></div><div style="text-align:center">${s.asistenciasPartidos}/${partidos.length}</div><div class="puntos">${pct}%</div></div>` }).join('');
   document.getElementById('asistResumen').textContent=`Total partidos: ${partidos.length} | Jugadores: ${plantilla.length}`;
   document.getElementById('tarjetasCard').innerHTML= allStats.filter(s=>s.amarillas||s.rojas).length ? `<div class="table-header" style="grid-template-columns:32px 1fr 36px 36px 60px"><div>#</div><div>JUGADOR</div><div style="text-align:center">🟨</div><div style="text-align:center">🟥</div><div>ESTADO</div></div>` + allStats.filter(s=>s.amarillas||s.rojas).map((s,i)=>{ let susp=s.rojas>=1 || s.amarillas>=2; return `<div class="table-row" style="grid-template-columns:32px 1fr 36px 36px 60px"><div>${i+1}</div><div>${s.nombre}</div><div style="text-align:center;color:#ffcc00">${s.amarillas}</div><div style="text-align:center;color:#ff5555">${s.rojas}</div><div>${susp?'<span class="suspendido">SUSPENDIDO</span>':'<span style="color:#666;font-size:10px">OK</span>'}</div></div>` }).join('') : '<div class="empty">Sin tarjetas</div>';
-  document.getElementById('listaPartidos').innerHTML=partidos.map((p,i)=>`<div style="background:#1c1c1c;padding:10px;border-radius:10px;margin-bottom:6px;border:1px solid #232323"><div style="display:flex;justify-content:space-between"><div><b>${p.local}</b> ${p.gL}-${p.gV} <b>${p.visit}</b><br><small style="color:#666">${p.fecha} • Asistieron: ${(p.asistentes||[]).length}</small></div>${isAdmin?`<div style="display:flex;gap:6px"><button class="btn-small btn-dark" style="font-size:10px;padding:5px 8px;width:auto" onclick="editarPartido(${i})">Editar</button><button class="btn-small" style="font-size:10px;padding:5px 8px;width:auto;background:#2a1515;color:#ff5555;border:1px solid #442222" onclick="borrarPartido(${i})">Borrar</button></div>`:`<span style="color:#222">👁️</span>`}</div></div>`).join('')||'<div class="empty">No hay partidos</div>';
+  document.getElementById('listaPartidos').innerHTML=partidos.map((p,i)=>`<div style="background:#1c1c1c;padding:10px;border-radius:10px;margin-bottom:6px;border:1px solid #232323"><div style="display:flex;justify-content:space-between"><div><b>${p.local}</b> ${p.gL}-${p.gV} <b>${p.visit}</b><br><small style="color:#666">${p.fecha} • Goles: ${(p.stats||[]).map(s=>s.nombre+':'+s.goles).join(', ')||'Sin detalle'} • Asist: ${(p.asistentes||[]).length}</small></div>${isAdmin?`<div style="display:flex;gap:6px"><button class="btn-small btn-dark" style="font-size:10px;padding:5px 8px;width:auto" onclick="editarPartido(${i})">Editar</button><button class="btn-small" style="font-size:10px;padding:5px 8px;width:auto;background:#2a1515;color:#ff5555;border:1px solid #442222" onclick="borrarPartido(${i})">Borrar</button></div>`:`<span style="color:#222">👁️</span>`}</div></div>`).join('')||'<div class="empty">No hay partidos</div>';
+  enforceNoNegatives();
+}
+
+// EXPORTAR EXCEL Y PDF - SOLO ADMIN
+window.exportarExcel=function(){
+  if(!isAdmin)return alert('Solo admin');
+  if(!torneoActual){ alert('Abre un torneo'); return; }
+  const wb = XLSX.utils.book_new();
+  let tabla=calc();
+  let wsTabla = XLSX.utils.json_to_sheet(tabla.map((t,i)=>({Pos:i+1, Equipo:t.nombre, PJ:t.pj, GF:t.gf, GC:t.gc, DG:t.dif, PTS:t.pts})));
+  XLSX.utils.book_append_sheet(wb, wsTabla, "Tabla Posiciones");
+  let stats=calcStats();
+  let goleadores=stats.filter(s=>s.goles>0).sort((a,b)=>b.goles-a.goles).map(s=>({Jugador:s.nombre, Equipo:s.equipo, Goles:s.goles, Asistencias:s.asistencias}));
+  let wsGoles = XLSX.utils.json_to_sheet(goleadores);
+  XLSX.utils.book_append_sheet(wb, wsGoles, "Goleadores");
+  let asist=stats.sort((a,b)=>b.asistenciasPartidos-a.asistenciasPartidos).map(s=>({Jugador:s.nombre, Equipo:s.equipo, Asistencias:s.asistenciasPartidos, TotalPartidos:partidos.length, Porcentaje: partidos.length? Math.round((s.asistenciasPartidos/partidos.length)*100)+'%' : '0%'}));
+  let wsAsist = XLSX.utils.json_to_sheet(asist);
+  XLSX.utils.book_append_sheet(wb, wsAsist, "Asistencias");
+  let tarjetas=stats.filter(s=>s.amarillas||s.rojas).map(s=>({Jugador:s.nombre, Equipo:s.equipo, Amarillas:s.amarillas, Rojas:s.rojas, Estado:(s.rojas>=1||s.amarillas>=2)?'SUSPENDIDO':'OK'}));
+  let wsTarj = XLSX.utils.json_to_sheet(tarjetas);
+  XLSX.utils.book_append_sheet(wb, wsTarj, "Tarjetas");
+  let parts=partidos.map(p=>({Fecha:p.fecha, Local:p.local, GolesLocal:p.gL, Visitante:p.visit, GolesVisita:p.gV, Goleadores:(p.stats||[]).map(s=>s.nombre+':'+s.goles).join(', '), Asistieron:(p.asistentes||[]).length}));
+  let wsParts = XLSX.utils.json_to_sheet(parts);
+  XLSX.utils.book_append_sheet(wb, wsParts, "Partidos");
+  let plant=plantilla.map(j=>({Nombre:j.nombre, Equipo:j.equipo, Posicion:j.pos, Numero:j.numero}));
+  let wsPlant = XLSX.utils.json_to_sheet(plant);
+  XLSX.utils.book_append_sheet(wb, wsPlant, "Plantilla");
+  XLSX.writeFile(wb, `${torneoActual.nombre}_Pro.xlsx`);
+}
+window.exportarPDF=function(){
+  if(!isAdmin)return alert('Solo admin');
+  if(!torneoActual){ alert('Abre un torneo'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text(`Torneo: ${torneoActual.nombre}`, 14, 18);
+  doc.setFontSize(10);
+  doc.text(`Fecha: ${new Date().toLocaleDateString()} - Exportado por Admin`, 14, 24);
+  let y=30;
+  let tabla=calc();
+  doc.text("Tabla de Posiciones", 14, y); y+=4;
+  doc.autoTable({ startY:y, head:[['#','Equipo','PJ','GF','GC','DG','PTS']], body: tabla.map((t,i)=>[i+1, t.nombre, t.pj, t.gf, t.gc, t.dif, t.pts]), theme:'grid', styles:{fontSize:8}, headStyles:{fillColor:[200,255,0], textColor:[0,0,0]} });
+  y = doc.lastAutoTable.finalY + 8;
+  if(y>250){ doc.addPage(); y=14; }
+  let stats=calcStats();
+  let goles=stats.filter(s=>s.goles>0).sort((a,b)=>b.goles-a.goles);
+  if(goles.length){ doc.text("Goleadores", 14, y); y+=4;
+  doc.autoTable({ startY:y, head:[['Jugador','Equipo','Goles','Asist']], body: goles.map(s=>[s.nombre, s.equipo, s.goles, s.asistencias]), theme:'grid', styles:{fontSize:8} });
+  y = doc.lastAutoTable.finalY + 8; }
+  if(y>250){ doc.addPage(); y=14; }
+  doc.text("Partidos", 14, y); y+=4;
+  doc.autoTable({ startY:y, head:[['Fecha','Local','Goles','Visita','Goles','Goleadores']], body: partidos.map(p=>[p.fecha, p.local, p.gL, p.visit, p.gV, (p.stats||[]).map(s=>s.nombre+':'+s.goles).join(', ')]), theme:'grid', styles:{fontSize:7} });
+  y = doc.lastAutoTable.finalY + 8;
+  let tarj=stats.filter(s=>s.amarillas||s.rojas);
+  if(tarj.length){
+    if(y>250){ doc.addPage(); y=14; }
+    doc.text("Tarjetas", 14, y); y+=4;
+    doc.autoTable({ startY:y, head:[['Jugador','Equipo','Amarillas','Rojas','Estado']], body: tarj.map(s=>[s.nombre, s.equipo, s.amarillas, s.rojas, (s.rojas>=1||s.amarillas>=2)?'SUSPENDIDO':'OK']), theme:'grid', styles:{fontSize:8} });
+  }
+  doc.save(`${torneoActual.nombre}_Pro.pdf`);
 }
 </script>
 </body>
