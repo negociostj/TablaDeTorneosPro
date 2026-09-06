@@ -51,7 +51,7 @@ body.is-admin .ad-box{display:none !important}
 </style>
 </head>
 <body>
-<div class="header"><div class="logo">TABLAS <span>PRO</span></div><div id="userBadge" style="font-size:11px;padding:6px 12px;border-radius:20px;background:#1a1a1a;color:#666">No logueado</div></div>
+<div class="header"><div class="logo">TABLAS <span>PRO</span> <small style="font-size:9px;color:#c8ff00;margin-left:8px">☁️ NUBE</small></div><div id="userBadge" style="font-size:11px;padding:6px 12px;border-radius:20px;background:#1a1a1a;color:#666">No logueado</div></div>
 
 <div id="authSection" class="auth-card">
 <h2>Entrar</h2>
@@ -163,7 +163,14 @@ function enforceNoNegatives(){
   });
 }
 function sanitizeNum(v){ let n=parseInt(v); if(isNaN(n) || n<0) return 0; return n; }
-const app=initializeApp(firebaseConfig); const db=getFirestore(app); const auth=getAuth(app); const torneosCol=collection(db,"torneos_pro");
+const app=initializeApp(firebaseConfig); 
+const db=getFirestore(app); 
+const auth=getAuth(app); 
+const torneosCol=collection(db,"torneos_pro");
+// Habilitar persistencia offline para que funcione aunque falle internet
+import { enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+enableIndexedDbPersistence(db).catch((err)=>{ console.log("Persistencia no habilitada", err.code); });
+
 let torneos=[], torneoActual=null, torneoActualId=null, equipos=[], partidos=[], plantilla=[], tempFoto='', isAdmin=false, currentUser=null, editJugId=null, editPartidoIdx=null;
 onAuthStateChanged(auth,(user)=>{
   currentUser=user;
